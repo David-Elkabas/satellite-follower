@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+    <style>
+        #mapid {
+            height: 500px;
+            width: 900px;
+        }
+    </style>
+    <title>satellite follower</title>
+</head>
+
+<body>
+
+    <h1>International Space Station on map</h1>
+    <h3>using Leafletjs & OpenStreetMap</h3>
+    <p>
+        longitude: <span id="lon"></span> <br>
+        latitude: <span id="lat"></span>
+    </p>
+    <div id="mapid"></div>
+    <script>
+
+        const api_url = 'https://api.wheretheiss.at/v1/satellites/25544'
+        const attribution = '&copy; <a herf = "https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+
+        //making a map and tiles
+        var mymap = L.map('mapid').setView([30, 0], 2);
+
+        const tileUrl = 'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const tiles = L.tileLayer(tileUrl, { attribution });
+        tiles.addTo(mymap);
+
+
+        //making a custom icon 
+        const myIcon = L.icon({
+            iconUrl: 'image.PNG',
+            iconSize: [60, 60],
+            iconAnchor: [30, 30],
+            popupAnchor: [20, -10],
+        });
+        var marker = L.marker([0, 0], { icon: myIcon }).addTo(mymap);
+        marker.bindPopup("<b>ISS</b><br>Location").openPopup();
+
+        async function getData() {
+            const response = await fetch(api_url);
+            const data = await response.json();
+            const { latitude, longitude } = data;
+            document.getElementById("lon").textContent = longitude;
+            document.getElementById("lat").textContent = latitude;
+
+            marker.setLatLng([latitude, longitude]);
+
+            var circle = L.circle([latitude, longitude], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+                radius: 500
+            }).addTo(mymap);
+
+
+            return (latitude, longitude)
+
+        }
+
+        getData();
+
+        setInterval(getData, 1000);
+
+
+
+    </script>
+</body>
+
+</html>
